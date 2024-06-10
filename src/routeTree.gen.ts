@@ -17,6 +17,8 @@ import { Route as rootRoute } from './routes/__root'
 // Create Virtual Routes
 
 const IndexLazyImport = createFileRoute('/')()
+const CardsIdLazyImport = createFileRoute('/cards/$id')()
+const CardsIdModalLazyImport = createFileRoute('/cards/$id/modal')()
 
 // Create/Update Routes
 
@@ -24,6 +26,18 @@ const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const CardsIdLazyRoute = CardsIdLazyImport.update({
+  path: '/cards/$id',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/cards.$id.lazy').then((d) => d.Route))
+
+const CardsIdModalLazyRoute = CardsIdModalLazyImport.update({
+  path: '/cards/$id/modal',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./routes/cards_.$id.modal.lazy').then((d) => d.Route),
+)
 
 // Populate the FileRoutesByPath interface
 
@@ -36,12 +50,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/cards/$id': {
+      id: '/cards/$id'
+      path: '/cards/$id'
+      fullPath: '/cards/$id'
+      preLoaderRoute: typeof CardsIdLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/cards/$id/modal': {
+      id: '/cards/$id/modal'
+      path: '/cards/$id/modal'
+      fullPath: '/cards/$id/modal'
+      preLoaderRoute: typeof CardsIdModalLazyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({ IndexLazyRoute })
+export const routeTree = rootRoute.addChildren({
+  IndexLazyRoute,
+  CardsIdLazyRoute,
+  CardsIdModalLazyRoute,
+})
 
 /* prettier-ignore-end */
 
@@ -51,11 +83,19 @@ export const routeTree = rootRoute.addChildren({ IndexLazyRoute })
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/cards/$id",
+        "/cards/$id/modal"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
+    },
+    "/cards/$id": {
+      "filePath": "cards.$id.lazy.tsx"
+    },
+    "/cards/$id/modal": {
+      "filePath": "cards_.$id.modal.lazy.tsx"
     }
   }
 }
