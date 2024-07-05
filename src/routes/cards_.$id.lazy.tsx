@@ -7,7 +7,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import cards from "@/lib/cards";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { ReactNode } from "react";
 
 export const Route = createFileRoute("/cards/$id")({
@@ -24,6 +24,9 @@ function CardRoute(): ReactNode {
 
   return (
     <div>
+      <button>
+        <Link to="/cards">back</Link>
+      </button>
       <Card>
         <CardHeader>
           <CardTitle>{card.title}</CardTitle>

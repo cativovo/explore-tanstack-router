@@ -13,30 +13,36 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as CardsImport } from './routes/cards'
+import { Route as IndexImport } from './routes/index'
 
 // Create Virtual Routes
 
-const IndexLazyImport = createFileRoute('/')()
 const CardsIdLazyImport = createFileRoute('/cards/$id')()
 const CardsIdModalLazyImport = createFileRoute('/cards/$id/modal')()
 
 // Create/Update Routes
 
-const IndexLazyRoute = IndexLazyImport.update({
+const CardsRoute = CardsImport.update({
+  path: '/cards',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+} as any)
 
 const CardsIdLazyRoute = CardsIdLazyImport.update({
   path: '/cards/$id',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/cards.$id.lazy').then((d) => d.Route))
+} as any).lazy(() => import('./routes/cards_.$id.lazy').then((d) => d.Route))
 
 const CardsIdModalLazyRoute = CardsIdModalLazyImport.update({
-  path: '/cards/$id/modal',
-  getParentRoute: () => rootRoute,
+  path: '/$id/modal',
+  getParentRoute: () => CardsRoute,
 } as any).lazy(() =>
-  import('./routes/cards_.$id.modal.lazy').then((d) => d.Route),
+  import('./routes/cards.$id_.modal.lazy').then((d) => d.Route),
 )
 
 // Populate the FileRoutesByPath interface
@@ -47,7 +53,14 @@ declare module '@tanstack/react-router' {
       id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexLazyImport
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/cards': {
+      id: '/cards'
+      path: '/cards'
+      fullPath: '/cards'
+      preLoaderRoute: typeof CardsImport
       parentRoute: typeof rootRoute
     }
     '/cards/$id': {
@@ -59,10 +72,10 @@ declare module '@tanstack/react-router' {
     }
     '/cards/$id/modal': {
       id: '/cards/$id/modal'
-      path: '/cards/$id/modal'
+      path: '/$id/modal'
       fullPath: '/cards/$id/modal'
       preLoaderRoute: typeof CardsIdModalLazyImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof CardsImport
     }
   }
 }
@@ -70,9 +83,9 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export const routeTree = rootRoute.addChildren({
-  IndexLazyRoute,
+  IndexRoute,
+  CardsRoute: CardsRoute.addChildren({ CardsIdModalLazyRoute }),
   CardsIdLazyRoute,
-  CardsIdModalLazyRoute,
 })
 
 /* prettier-ignore-end */
@@ -84,18 +97,25 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/cards/$id",
-        "/cards/$id/modal"
+        "/cards",
+        "/cards/$id"
       ]
     },
     "/": {
-      "filePath": "index.lazy.tsx"
+      "filePath": "index.tsx"
+    },
+    "/cards": {
+      "filePath": "cards.tsx",
+      "children": [
+        "/cards/$id/modal"
+      ]
     },
     "/cards/$id": {
-      "filePath": "cards.$id.lazy.tsx"
+      "filePath": "cards_.$id.lazy.tsx"
     },
     "/cards/$id/modal": {
-      "filePath": "cards_.$id.modal.lazy.tsx"
+      "filePath": "cards.$id_.modal.lazy.tsx",
+      "parent": "/cards"
     }
   }
 }
